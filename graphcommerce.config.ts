@@ -10,15 +10,15 @@ const config: Partial<GraphCommerceConfig> = {
   limitSsg: true,
 
   // Magento Backend
-  magentoEndpoint: 'https://verlichting.nl/graphql',
+  magentoEndpoint: 'https://www.verlichting.nl/graphql',
   magentoVersion: 245, // Magento 2.4.5
-  canonicalBaseUrl: 'https://verlichting.nl',
+  canonicalBaseUrl: 'https://www.verlichting.nl',
 
   // Storefronts - Dutch only for now
   storefront: [
     {
       locale: 'nl',
-      magentoStoreCode: 'default', // TODO: Verify actual store code
+      magentoStoreCode: 'nl', // Verified store code
       defaultLocale: true,
       googleAnalyticsId: undefined, // TODO: Add GA ID
       googleRecaptchaKey: undefined,
