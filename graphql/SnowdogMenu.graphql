@@ -1,0 +1,37 @@
+# Snowdog Menu GraphQL query for the main navigation
+# The menu identifier should match the one configured in Magento Admin > Content > Snowdog Menu
+
+fragment SnowdogMenuNodeFragment on SnowdogMenuNodeInterface {
+  node_id
+  title
+  url_key
+  type
+  level
+  parent_id
+  position
+  classes
+  node_template
+  submenu_template
+  ... on SnowdogMenuNode {
+    content
+    image
+    image_alt_text
+  }
+  ... on SnowdogMenuCmsPageNode {
+    content
+  }
+  ... on SnowdogMenuCustomUrlNode {
+    content
+    image
+    image_alt_text
+    target
+  }
+}
+
+fragment SnowdogMenuFragment on Query {
+  snowdogMenu: snowdogMenuNodes(identifier: "main-menu") {
+    items {
+      ...SnowdogMenuNodeFragment
+    }
+  }
+}

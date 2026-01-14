@@ -1,8 +1,30 @@
 query Layout {
-  menu: categories {
-    __typename
+  # Snowdog Menu for main navigation (configured in Magento Admin > Content > Snowdog Menu)
+  ...SnowdogMenuFragment
+
+  # Categories for URL lookup (maps category IDs to URL paths for Snowdog Menu)
+  categories {
+    items {
+      uid
+      url_path
+      name
+      children {
+        uid
+        url_path
+        name
+        children {
+          uid
+          url_path
+          name
+          children {
+            uid
+            url_path
+            name
+          }
+        }
+      }
+    }
   }
-  ...MenuQueryFragment
 
   cmsBlocks(identifiers: ["footer_links_block"]) {
     items {

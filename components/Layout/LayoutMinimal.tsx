@@ -10,7 +10,7 @@ export type LayoutMinimalProps = LayoutQuery &
   Omit<LayoutDefaultProps, 'header' | 'footer' | 'cartFab' | 'noSticky'>
 
 export function LayoutMinimal(props: LayoutMinimalProps) {
-  const { menu, children, cmsBlocks, ...uiProps } = props
+  const { snowdogMenu: _snowdogMenu, children, cmsBlocks, ...uiProps } = props
 
   const footerBlock = cmsBlocks?.items?.find((item) => item?.identifier === 'footer_links_block')
 

@@ -1,5 +1,4 @@
 import { CartFab, useCartEnabled } from '@graphcommerce/magento-cart'
-import { magentoMenuToNavigation } from '@graphcommerce/magento-category'
 import { CmsBlock } from '@graphcommerce/magento-cms'
 import { CustomerFab, CustomerMenuFabItem } from '@graphcommerce/magento-customer'
 import { SearchFab, SearchField } from '@graphcommerce/magento-search'
@@ -14,8 +13,6 @@ import {
   DarkLightModeMenuSecondaryItem,
   DesktopNavActions,
   DesktopNavBar,
-  DesktopNavItem,
-  iconChevronDown,
   iconCustomerService,
   iconHeart,
   IconSvg,
@@ -33,6 +30,8 @@ import { t } from '@lingui/core/macro'
 import { Trans } from '@lingui/react/macro'
 import { Divider, Fab } from '@mui/material'
 import { useRouter } from 'next/router'
+import { snowdogMenuToNavigation } from '../../lib/snowdogMenuToNavigation'
+import { MegaMenu } from './MegaMenu'
 import { productListRenderer } from '../ProductListItems/productListRenderer'
 import { Footer } from './Footer'
 import type { LayoutQuery } from './Layout.gql'
@@ -42,7 +41,7 @@ export type LayoutNavigationProps = LayoutQuery &
   Omit<LayoutDefaultProps, 'footer' | 'header' | 'cartFab' | 'menuFab'>
 
 export function LayoutNavigation(props: LayoutNavigationProps) {
-  const { menu, children, cmsBlocks, ...uiProps } = props
+  const { snowdogMenu, categories, children, cmsBlocks, ...uiProps } = props
 
   const selection = useNavigationSelection()
   const router = useRouter()
@@ -58,17 +57,8 @@ export function LayoutNavigation(props: LayoutNavigationProps) {
         items={useMemoDeep(
           () => [
             { id: 'home', name: <Trans>Home</Trans>, href: '/' },
-            {
-              id: 'manual-item-one',
-              href: `/${menu?.items?.[0]?.children?.[0]?.url_path}`,
-              name: menu?.items?.[0]?.children?.[0]?.name ?? '',
-            },
-            {
-              id: 'manual-item-two',
-              href: `/${menu?.items?.[0]?.children?.[1]?.url_path}`,
-              name: menu?.items?.[0]?.children?.[1]?.name ?? '',
-            },
-            ...magentoMenuToNavigation(menu, true),
+            // Snowdog menu items
+            ...snowdogMenuToNavigation(snowdogMenu?.items, true),
             <Divider key='divider' sx={(theme) => ({ my: theme.spacings.xs })} />,
             <CustomerMenuFabItem
               onClick={() => selection.set(false)}
@@ -95,7 +85,7 @@ export function LayoutNavigation(props: LayoutNavigationProps) {
             <DarkLightModeMenuSecondaryItem key='darkmode' />,
             <StoreSwitcherMenuFabSecondaryItem key='store-switcher' />,
           ],
-          [menu, selection],
+          [snowdogMenu, selection],
         )}
       >
         <NavigationOverlay
@@ -121,23 +111,7 @@ export function LayoutNavigation(props: LayoutNavigationProps) {
             <Logo />
 
             <DesktopNavBar>
-              {menu?.items?.[0]?.children?.slice(0, 2).map((item) => (
-                <DesktopNavItem key={item?.uid} href={`/${item?.url_path}`}>
-                  {item?.name}
-                </DesktopNavItem>
-              ))}
-              <DesktopNavItem
-                onClick={() => selection.set([menu?.items?.[0]?.uid || ''])}
-                onKeyUp={(evt) => {
-                  if (evt.key === 'Enter') {
-                    selection.set([menu?.items?.[0]?.uid || ''])
-                  }
-                }}
-                tabIndex={0}
-              >
-                {menu?.items?.[0]?.name}
-                <IconSvg src={iconChevronDown} />
-              </DesktopNavItem>
+              <MegaMenu items={snowdogMenu?.items} categories={categories} />
             </DesktopNavBar>
             <DesktopNavActions>
               <StoreSwitcherButton />
