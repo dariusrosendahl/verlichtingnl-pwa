@@ -3,7 +3,8 @@ query Layout {
   ...SnowdogMenuFragment
 
   # Categories for URL lookup (maps category IDs to URL paths for Snowdog Menu)
-  categories {
+  # Use alias to avoid conflict with CategoryPage query's categories field
+  navigationCategories: categories {
     items {
       uid
       url_path
