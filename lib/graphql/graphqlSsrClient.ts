@@ -13,6 +13,7 @@ import { getBuiltMesh, MeshApolloLink } from '@graphcommerce/graphql-mesh'
 import { storefrontConfig, storefrontConfigDefault } from '@graphcommerce/next-ui'
 import type { GetStaticPropsContext } from 'next'
 import { i18nSsrLoader } from '../i18n/I18nProvider'
+import { transformImageUrlsLink } from '../transformImageUrlsLink'
 
 function client(context: GetStaticPropsContext, fetchPolicy: FetchPolicy = 'no-cache') {
   const config = graphqlConfig({
@@ -24,6 +25,8 @@ function client(context: GetStaticPropsContext, fetchPolicy: FetchPolicy = 'no-c
     link: ApolloLink.from([
       ...(process.env.NODE_ENV !== 'production' ? [measurePerformanceLink] : []),
       errorLink,
+      // Transform local Magento image URLs to relative paths in development
+      transformImageUrlsLink,
       ...config.links,
       new MeshApolloLink(getBuiltMesh()),
     ]),
