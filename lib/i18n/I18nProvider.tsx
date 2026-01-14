@@ -6,7 +6,7 @@ import { i18n } from '@lingui/core'
 type I18nProviderProps = Pick<LinguiProviderProps, 'locale' | 'children'>
 
 const ssrLoader: SyncMessageLoader = (l: string) =>
-  // eslint-disable-next-line global-require, import/no-dynamic-require, @typescript-eslint/no-var-requires
+  // eslint-disable-next-line global-require, import/no-dynamic-require, @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
   typeof window === 'undefined' ? require(`../../locales/${l}.po`) : { messages: [] }
 
 export function i18nSsrLoader(locale?: string) {

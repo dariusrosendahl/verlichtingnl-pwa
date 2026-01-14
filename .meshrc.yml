@@ -5,6 +5,7 @@ sources:
         endpoint: '{graphCommerce.magentoEndpoint}'
         useGETForQueries: true
         batch: false
+        skipSSLValidation: true
         operationHeaders:
           Store: '{context.headers.store}'
           Authorization: '{context.headers.authorization}'
@@ -13,6 +14,313 @@ sources:
           Content-Currency: "{context.headers['content-currency']}"
           X-Magento-Cache-Id: "{context.headers['x-magento-cache-id']}"
           X-Forwarded-For: "{context.headers['x-forwarded-for']}"
+
+# Add stub types for missing Magento features
+additionalTypeDefs: |
+  # Stub for Compare module (not enabled in Magento)
+  type ComparableItem {
+    uid: ID!
+    product: ProductInterface!
+    attributes: [ProductAttribute!]!
+  }
+
+  type ProductAttribute {
+    code: String!
+    value: String
+  }
+
+  type CompareList {
+    uid: ID!
+    item_count: Int!
+    items: [ComparableItem!]
+    attributes: [ComparableAttribute!]
+  }
+
+  type ComparableAttribute {
+    code: String!
+    label: String!
+  }
+
+  extend type Query {
+    compareList(uid: ID!): CompareList
+  }
+
+  input AddProductsToCompareListInput {
+    uid: ID!
+    products: [ID!]!
+  }
+
+  input CreateCompareListInput {
+    products: [ID!]
+  }
+
+  input DeleteCompareListInput {
+    uid: ID!
+  }
+
+  input RemoveProductsFromCompareListInput {
+    uid: ID!
+    products: [ID!]!
+  }
+
+  extend type Mutation {
+    addProductsToCompareList(input: AddProductsToCompareListInput): CompareList
+    assignCompareListToCustomer(uid: ID!): AssignCompareListToCustomerOutput
+    createCompareList(input: CreateCompareListInput): CompareList
+    deleteCompareList(uid: ID!): DeleteCompareListOutput
+    removeProductsFromCompareList(input: RemoveProductsFromCompareListInput): CompareList
+  }
+
+  type AssignCompareListToCustomerOutput {
+    result: Boolean!
+    compare_list: CompareList
+  }
+
+  type DeleteCompareListOutput {
+    result: Boolean!
+  }
+
+  extend type Customer {
+    compare_list: CompareList
+  }
+
+  # Fix empty PriceAdjustmentCodesEnum
+  extend enum PriceAdjustmentCodesEnum {
+    WEEE
+    WEEE_TAX
+  }
+
+  # Stub for PaymentToken (Vault module not enabled)
+  type PaymentToken {
+    public_hash: String!
+    payment_method_code: String!
+    type: PaymentTokenTypeEnum!
+    details: String
+    is_visible: Boolean!
+    is_default: Boolean!
+  }
+
+  enum PaymentTokenTypeEnum {
+    card
+    account
+  }
+
+  type CustomerPaymentTokens {
+    items: [PaymentToken!]!
+  }
+
+  extend type Customer {
+    payment_tokens: CustomerPaymentTokens
+  }
+
+  type DeletePaymentTokenOutput {
+    result: Boolean!
+    customerPaymentTokens: CustomerPaymentTokens
+  }
+
+  extend type Mutation {
+    deletePaymentToken(public_hash: String!): DeletePaymentTokenOutput
+  }
+
+  extend type Query {
+    customerPaymentTokens: CustomerPaymentTokens
+  }
+
+  # Stub for Checkout Agreements (Terms & Conditions)
+  type CheckoutAgreement {
+    agreement_id: Int!
+    checkbox_text: String!
+    content: String!
+    content_height: String
+    is_html: Boolean!
+    mode: CheckoutAgreementMode!
+    name: String!
+  }
+
+  enum CheckoutAgreementMode {
+    AUTO
+    MANUAL
+  }
+
+  extend type Query {
+    checkoutAgreements: [CheckoutAgreement!]
+  }
+
+  # Stub for Newsletter subscription
+  type SubscribeEmailToNewsletterOutput {
+    status: SubscriptionStatusesEnum
+  }
+
+  enum SubscriptionStatusesEnum {
+    NOT_ACTIVE
+    SUBSCRIBED
+    UNSUBSCRIBED
+    UNCONFIRMED
+  }
+
+  extend type Mutation {
+    subscribeEmailToNewsletter(email: String!): SubscribeEmailToNewsletterOutput
+  }
+
+  # Stub for Downloadable Products
+  type CustomerDownloadableProducts {
+    items: [CustomerDownloadableProduct!]
+  }
+
+  type CustomerDownloadableProduct {
+    date: String
+    download_url: String
+    order_increment_id: String
+    remaining_downloads: String
+    status: String
+  }
+
+  extend type Query {
+    customerDownloadableProducts: CustomerDownloadableProducts
+  }
+
+  # Stub for Wishlist multi-list support
+  input CreateWishlistInput {
+    name: String!
+    visibility: WishlistVisibilityEnum!
+  }
+
+  enum WishlistVisibilityEnum {
+    PUBLIC
+    PRIVATE
+  }
+
+  type CreateWishlistOutput {
+    wishlist: Wishlist!
+  }
+
+  type DeleteWishlistOutput {
+    status: Boolean!
+    wishlists: [Wishlist!]!
+  }
+
+  type UpdateWishlistOutput {
+    name: String!
+    uid: ID!
+    visibility: WishlistVisibilityEnum!
+  }
+
+  extend type Mutation {
+    createWishlist(input: CreateWishlistInput!): CreateWishlistOutput
+    deleteWishlist(wishlistId: ID!): DeleteWishlistOutput
+    updateWishlist(name: String!, wishlistId: ID!, visibility: WishlistVisibilityEnum!): UpdateWishlistOutput
+  }
+
+  # Stub for Reviews
+  input CreateProductReviewInput {
+    sku: String!
+    nickname: String!
+    summary: String!
+    text: String!
+    ratings: [ProductReviewRatingInput]!
+  }
+
+  input ProductReviewRatingInput {
+    id: String!
+    value_id: String!
+  }
+
+  type CreateProductReviewOutput {
+    review: ProductReview!
+  }
+
+  extend type Mutation {
+    createProductReview(input: CreateProductReviewInput!): CreateProductReviewOutput
+  }
+
+  extend type Query {
+    productReviewRatingsMetadata: ProductReviewRatingsMetadata
+  }
+
+  type ProductReviewRatingsMetadata {
+    items: [ProductReviewRatingMetadata!]!
+  }
+
+  type ProductReviewRatingMetadata {
+    id: String!
+    name: String!
+    values: [ProductReviewRatingValueMetadata!]!
+  }
+
+  type ProductReviewRatingValueMetadata {
+    value_id: String!
+    value: String!
+  }
+
+  # Stub for Inventory fields on ProductInterface
+  extend interface ProductInterface {
+    only_x_left_in_stock: Float
+    stock_status: ProductStockStatus
+  }
+
+  enum ProductStockStatus {
+    IN_STOCK
+    OUT_OF_STOCK
+  }
+
+  # Need to add to all product types that implement ProductInterface
+  extend type SimpleProduct {
+    only_x_left_in_stock: Float
+    stock_status: ProductStockStatus
+  }
+
+  extend type ConfigurableProduct {
+    only_x_left_in_stock: Float
+    stock_status: ProductStockStatus
+  }
+
+  extend type VirtualProduct {
+    only_x_left_in_stock: Float
+    stock_status: ProductStockStatus
+  }
+
+  extend type DownloadableProduct {
+    only_x_left_in_stock: Float
+    stock_status: ProductStockStatus
+  }
+
+  extend type BundleProduct {
+    only_x_left_in_stock: Float
+    stock_status: ProductStockStatus
+  }
+
+  extend type GroupedProduct {
+    only_x_left_in_stock: Float
+    stock_status: ProductStockStatus
+  }
+
+  # Stub for missing sort field
+  extend input ProductAttributeSortInput {
+    new: SortEnum
+  }
+
+  # Stub for CheckMo payment config fields and other missing StoreConfig fields
+  extend type StoreConfig {
+    check_money_order_make_check_payable_to: String
+    check_money_order_send_check_to: String
+    check_money_order_min_order_total: String
+    check_money_order_max_order_total: String
+    check_money_order_new_order_status: String
+    check_money_order_payment_from_specific_countries: String
+    check_money_order_sort_order: Int
+    # SEO/Design fields
+    copyright: String
+    default_description: String
+    default_keywords: String
+    default_title: String
+    head_shortcut_icon: String
+    header_logo_src: String
+    logo_alt: String
+    logo_height: Int
+    logo_width: Int
+    title_prefix: String
+    title_suffix: String
+  }
 serve:
   playground: true
 plugins:

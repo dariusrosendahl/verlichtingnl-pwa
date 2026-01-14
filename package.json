@@ -10,8 +10,10 @@
     "node": ">=20 <24.0.0"
   },
   "scripts": {
-    "dev": "concurrently -k -n codegen,next 'gc-gql-codegen -w' 'next dev --turbopack' -c 'magenta,cyan'",
-    "codegen": "graphcommerce codegen && gc-mesh build && gc-gql-codegen",
+    "dev": "concurrently -k -n codegen,next 'gc-gql-codegen -w' 'next dev' -c 'magenta,cyan'",
+    "dev:turbo": "concurrently -k -n codegen,next 'gc-gql-codegen -w' 'next dev --turbopack' -c 'magenta,cyan'",
+    "codegen": "graphcommerce codegen && gc-gql-codegen",
+    "codegen:full": "graphcommerce codegen && gc-mesh build && gc-gql-codegen",
     "build": "graphcommerce codegen && gc-mesh build && gc-gql-codegen && next build",
     "start": "next start",
     "tsc:lint": "tsc --noEmit -p .",

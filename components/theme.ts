@@ -21,62 +21,66 @@ import type {} from '@mui/material/themeCssVarsAugmentation'
 const lightPalette: PaletteOptions = {
   mode: 'light',
   primary: {
-    main: '#000000',
-    contrastText: '#ffffff',
-    dark: '#000000',
+    main: '#faae00', // Verlichting.nl yellow/orange
+    contrastText: '#1f1f1f',
+    dark: '#e09d00',
+    light: '#ffc233',
   },
   secondary: {
-    main: '#006bff',
-    light: '#d1e4ff',
+    main: '#1f1f1f', // Dark gray/black
+    light: '#4f5151',
     contrastText: '#ffffff',
   },
   background: {
-    default: '#F9F9FA',
+    default: '#ffffff', // White background
     paper: '#ffffff',
     image: '#ffffff',
   },
   divider: '#00000015',
   success: {
-    main: '#01d26a',
+    main: '#28a745', // Verlichting.nl green
   },
   action: {
     hoverOpacity: 0.12,
   },
   text: {
-    primary: '#0F0F10',
-    secondary: '#03031755',
-    disabled: '#03031735',
+    primary: '#1f1f1f',
+    secondary: '#4f5151',
+    disabled: '#9e9e9e',
   },
 }
 
 const darkPalette: PaletteOptions = {
   mode: 'dark',
   primary: {
-    main: '#006bff',
-    contrastText: '#ffffff',
-    dark: '#0056d2',
+    main: '#faae00', // Verlichting.nl yellow/orange
+    contrastText: '#1f1f1f',
+    dark: '#e09d00',
+    light: '#ffc233',
   },
   secondary: {
-    main: '#78909c',
-    light: '#b0bec5',
-    contrastText: '#000000',
+    main: '#9e9e9e',
+    light: '#bdbdbd',
+    contrastText: '#1f1f1f',
   },
   background: {
-    default: '#121212',
-    paper: '#1E1E1E',
+    // Use light mode colors to disable dark mode visually
+    default: '#ffffff',
+    paper: '#ffffff',
     image: '#ffffff',
   },
-  divider: '#ffffff30',
+  divider: '#00000015',
   success: {
-    main: '#01D26A',
+    main: '#28a745', // Verlichting.nl green
   },
   action: {
     hoverOpacity: 0.16,
   },
   text: {
-    primary: '#ffffff',
-    secondary: '#ffffff80',
-    disabled: '#ffffff30',
+    // Use light mode text colors
+    primary: '#1f1f1f',
+    secondary: '#4f5151',
+    disabled: '#9e9e9e',
   },
 }
 
@@ -86,6 +90,7 @@ const fontSize = (from: number, to: number) =>
 // Create a theme instance.
 const theme = createTheme({
   cssVariables: { colorSchemeSelector: 'class', cssVarPrefix: '', nativeColor: true },
+  defaultColorScheme: 'light',
   colorSchemes: {
     light: { palette: lightPalette },
     dark: { palette: darkPalette },
@@ -93,8 +98,7 @@ const theme = createTheme({
   ...themeBaseDefaults,
   shape: { borderRadius: 3 },
   typography: {
-    fontFamily:
-      '-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji',
+    fontFamily: 'Segoe UI, Helvetica Neue, Arial, sans-serif',
     // @see docs typography.md
     h1: {
       ...fontSize(28, 64),

@@ -1,9 +1,9 @@
 {
-  "name": "GraphCommerce",
-  "short_name": "GraphCommerce",
-  "description": "GraphCommerce® is a headless e-commerce frontend for Magento and Adobe Commerce.",
+  "name": "Verlichting.nl",
+  "short_name": "VNL",
+  "description": "Dé online lichtspecialist - Verlichting.nl",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#fbad17",
   "background_color": "#FFFFFF",
   "start_url": "/",
   "launch_handler": {

@@ -1,101 +1,217 @@
-<p align="center">
-    <a href="https://www.graphcommerce.org/"><img src="https://graphcommerce.vercel.app/favicon.svg" alt="GraphCommerce Logo"/></a>
-</p>
+# Verlichting.nl PWA (GraphCommerce)
 
-<div align="center">
+A headless PWA storefront for Verlichting.nl built with [GraphCommerce](https://graphcommerce.org/).
 
-📚 [Docs](https://graphcommerce.org/docs) | 🗣
-[Slack](https://join.slack.com/t/graphcommerce/shared_invite/zt-11rmgq1ad-F~0daNtKcSvtcC4eQRzjeQ)
-| 📝
-[Release notes](https://github.com/graphcommerce-org/graphcommerce/releases)
+## Prerequisites
 
-</div>
+- Node.js >= 20 < 24
+- Yarn 4.1.1 (via corepack: `corepack enable`)
+- Running Magento instance (Docker setup in `/klanten/verlichting/src`)
 
-GraphCommerce is a framework for building headless ecommerce storefronts in
-React and Next.js. It provides a best-in-class example, including components and
-utilities, to deliver a high-performance, high-quality ecommerce Progressive Web
-App (PWA).
+## Quick Start
 
-Explore the [GraphCommerce demo](https://graphcommerce.vercel.app/) or start
-building your custom GraphCommerce ecommerce frontend.
+### 1. Start Magento Backend
 
-https://user-images.githubusercontent.com/1251986/226889542-ec403549-5e4f-4ff6-8fc5-ba879798353f.mp4
-
-The GraphCommerce homepage, showcasing content from Magento through a variety of
-included UX components.
-
----
-
-# Getting started with GraphCommerce
-
-In this guide, you will set up a GraphCommerce app locally, allowing you to
-start building.
-
-### Requirements
-
-- Install and use node 16/18: `nvm install 16` or `nvm use 16`
-- Install yarn: `corepack enable`
-
-## Step 1: Create a GraphCommerce app
+First, ensure the Magento Docker containers are running:
 
 ```bash
-git clone -b main --depth 1 https://github.com/graphcommerce-org/graphcommerce.git
-# Clone repository
+cd /Users/dariusrosendahl/klanten/verlichting/src
+docker-compose -f compose.yaml up -d
 ```
 
+Verify containers are running:
 ```bash
-mkdir my-project
-# Create project folder
+docker ps | grep verlichting
 ```
 
+### 2. Run Magento Indexers
+
+The PWA needs indexed data from Magento:
+
 ```bash
-cp -R graphcommerce/examples/magento/. my-project && rm -rf graphcommerce && cd my-project
-# Copy example, delete repo, navigate to project folder
+docker exec verlichting-phpfpm-1 bin/magento indexer:reindex
+docker exec verlichting-phpfpm-1 bin/magento cache:flush
 ```
 
-## Step 2: Configure API keys
+### 3. Generate GraphQL Mesh
 
-(Optional,
-[continue reading](https://www.graphcommerce.org/docs/getting-started/create))
-
-## Step 3: Start the app
+The PWA uses GraphQL Mesh to connect to Magento. Generate the mesh files:
 
 ```bash
-yarn
-# Install the dependencies
+cd /Users/dariusrosendahl/klanten/verlichting-pwa
+
+# SSL verification must be disabled for local self-signed certificates
+NODE_TLS_REJECT_UNAUTHORIZED=0 yarn codegen:full
 ```
 
+### 4. Start Development Server
+
 ```bash
+NODE_TLS_REJECT_UNAUTHORIZED=0 yarn dev
+```
+
+The PWA will be available at: http://localhost:3000
+
+## Configuration
+
+### Magento Endpoint
+
+The Magento GraphQL endpoint is configured in `graphcommerce.config.ts`:
+
+```typescript
+magentoEndpoint: 'https://verlichtingnl.localho.st/graphql',
+```
+
+This must match the Magento base URL configured in the Docker setup.
+
+### Environment Variables
+
+The `.env` file contains:
+- `MAGENTO_ENDPOINT` - Production Magento URL (used as fallback)
+
+### SSL Certificate Issues
+
+The local Magento uses a self-signed SSL certificate. To bypass certificate verification:
+
+```bash
+NODE_TLS_REJECT_UNAUTHORIZED=0 yarn dev
+```
+
+## Common Commands
+
+```bash
+# Install dependencies
+yarn install
+
+# Run codegen (generates GraphQL types)
 yarn codegen
-# Converts all .graphql files to typescript files
+
+# Run full codegen including mesh build
+NODE_TLS_REJECT_UNAUTHORIZED=0 yarn codegen:full
+
+# Start dev server
+NODE_TLS_REJECT_UNAUTHORIZED=0 yarn dev
+
+# Start dev server with Turbopack (faster)
+NODE_TLS_REJECT_UNAUTHORIZED=0 yarn dev:turbo
+
+# Build for production
+NODE_TLS_REJECT_UNAUTHORIZED=0 yarn build
+
+# Start production server
+yarn start
+
+# Lint code
+yarn tsc:lint
+
+# Extract translations
+yarn lingui
 ```
 
+## Troubleshooting
+
+### "Module not found: Can't resolve '../../../.mesh'"
+
+The GraphQL Mesh hasn't been generated. Run:
 ```bash
-yarn dev
-# Run the app
+NODE_TLS_REJECT_UNAUTHORIZED=0 yarn codegen:full
 ```
 
----
+### "Failed to fetch introspection from ... TypeError: Cannot read properties of undefined"
 
-🎉 Explore your GraphCommerce app running at http://localhost:3000
+1. Check Magento is running: `docker ps | grep verlichting`
+2. Ensure the endpoint URL is correct in `graphcommerce.config.ts`
+3. Make sure `NODE_TLS_REJECT_UNAUTHORIZED=0` is set
 
-(Explore the GraphQL Playground running at http://localhost:3000/api/graphql)
+### GraphQL errors about missing CMS blocks
 
-> No success? Consult the
-> [troubleshooting guide](../../docs/framework/troubleshooting.md)
+Some CMS blocks referenced in the PWA may not exist in the local Magento. These are non-critical warnings:
+```
+[GraphQL errors]: The CMS block with the "footer_links_block" ID doesn't exist.
+```
 
-## Next steps
+### Raw HTML showing instead of rendered content
 
-- The [Quick start](../../docs/getting-started/readme.md) guide covers about 80%
-  of the concepts you'll use, so it's a great place to start.
-- [Start customizing](../../docs/getting-started/start-building.md) to go from
-  "Hello World" to a fully built GraphCommerce custom storefront.
+This indicates CMS content from Magento contains HTML that needs proper rendering. Check if the CMS pages/blocks have the correct content format.
 
-<p align="center">
-  <a aria-label="License" href="https://github.com/graphcommerce-org/graphcommerce/blob/main/LICENSE.md">
-    <img alt="" src="https://img.shields.io/badge/License-ELv2-green?style=for-the-badge">
-  </a>
-  <a aria-label="Vercel logo" href="https://vercel.com?utm_source=graphcommerce&utm_campaign=oss">
-    <img src="https://img.shields.io/badge/POWERED%20BY%20Vercel-000000.svg?style=for-the-badge&logo=Vercel&labelColor=000">
-  </a>
-</p>
+### Product images not loading (blank/white boxes)
+
+**Known Limitation**: Product images from local Magento won't load due to SSL certificate issues. The local Magento uses a self-signed certificate that Next.js image optimization cannot verify.
+
+The PWA is fully functional for development - you can:
+- Browse categories and products
+- Test cart and checkout flows
+- Work on component styling and layout
+
+Images will work correctly in production where valid SSL certificates are used.
+
+**Workaround**: If you need to see images during development, you can temporarily view the product on the production site (www.verlichting.nl) to see how it should look.
+
+### Turbopack Internal Errors / 500 Internal Server Error
+
+If you get repeated `TurbopackInternalError: failed to receive message` or 500 errors:
+
+1. Kill all running servers:
+   ```bash
+   pkill -f "next dev"
+   lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+   ```
+
+2. Clear the cache and reinstall:
+   ```bash
+   rm -rf node_modules/.cache .next
+   yarn install
+   ```
+
+3. Restore the GraphQL config file (this can get corrupted by codegen):
+   ```bash
+   cp node_modules/@graphcommerce/graphql/config.original.ts node_modules/@graphcommerce/graphql/config.ts
+   ```
+
+4. Restart the dev server:
+   ```bash
+   NODE_TLS_REJECT_UNAUTHORIZED=0 yarn dev
+   ```
+
+### "Export graphqlConfig doesn't exist in target module"
+
+The `config.ts` file in `node_modules/@graphcommerce/graphql/` was deleted or corrupted. Fix it:
+```bash
+cp node_modules/@graphcommerce/graphql/config.original.ts node_modules/@graphcommerce/graphql/config.ts
+```
+
+### Plugin target not found errors during codegen
+
+These warnings are harmless and can be ignored:
+```
+Plugin target not found @graphcommerce/graphql#graphqlConfig for plugin...
+```
+The codegen will still complete successfully.
+
+## Project Structure
+
+```
+verlichting-pwa/
+├── .mesh/                  # Generated GraphQL Mesh files
+├── components/             # React components
+├── graphql/               # GraphQL queries and fragments
+├── lib/                   # Utility libraries
+├── pages/                 # Next.js pages
+├── plugins/               # GraphCommerce plugins
+├── public/                # Static assets
+├── graphcommerce.config.ts # Main configuration
+└── package.json
+```
+
+## Useful URLs
+
+- PWA Dev: http://localhost:3000
+- Magento Admin: https://verlichtingnl.localho.st/beheer
+- Magento GraphQL: https://verlichtingnl.localho.st/graphql
+- phpMyAdmin: http://localhost:8080
+
+## Related Documentation
+
+- [GraphCommerce Docs](https://graphcommerce.org/docs)
+- [Next.js Docs](https://nextjs.org/docs)
+- [Magento GraphQL API](https://developer.adobe.com/commerce/webapi/graphql/)

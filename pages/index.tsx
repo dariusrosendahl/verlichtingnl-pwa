@@ -15,10 +15,27 @@ export type CmsPageProps = { cmsPage: CmsPageFragment | null }
 
 type GetPageStaticProps = GetStaticProps<LayoutNavigationProps, CmsPageProps>
 
+// Helper to decode HTML entities
+function decodeHtmlEntities(html: string): string {
+  const txt = document.createElement('textarea')
+  txt.innerHTML = html
+  return txt.value
+}
+
 function HomePage(props: CmsPageProps) {
   const { cmsPage } = props
 
   if (!cmsPage) return <Container>Configure cmsPage home</Container>
+
+  // Decode HTML entities if present
+  const content = cmsPage.content
+    ? cmsPage.content
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&amp;/g, '&')
+    : ''
 
   return (
     <>
@@ -28,7 +45,12 @@ function HomePage(props: CmsPageProps) {
       />
       <LayoutHeader floatingMd hideMd={breadcrumbs} floatingSm />
 
-      <CmsPageContent cmsPage={cmsPage} productListRenderer={productListRenderer} />
+      {/* Temporary: Render CMS HTML directly until proper CMS is set up */}
+      {content ? (
+        <div dangerouslySetInnerHTML={{ __html: content }} />
+      ) : (
+        <CmsPageContent cmsPage={cmsPage} productListRenderer={productListRenderer} />
+      )}
     </>
   )
 }

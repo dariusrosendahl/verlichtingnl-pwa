@@ -10,13 +10,12 @@ import {
   normalizeLocale,
   withEmotionCache,
 } from '@graphcommerce/next-ui/server'
-import InitColorSchemeScript from '@mui/material/InitColorSchemeScript'
 import NextDocument, { Head, Html, Main, NextScript } from 'next/document'
 
 class Document extends NextDocument<EmotionCacheProps & LinguiDocumentProps> {
   render() {
     return (
-      <Html lang={normalizeLocale(this.props.locale)}>
+      <Html lang={normalizeLocale(this.props.locale)} className='light'>
         <Head>
           <DocumentHeadStart key='head-start' {...this.props} />
           {getCssFlagsInitScript()}
@@ -28,7 +27,6 @@ class Document extends NextDocument<EmotionCacheProps & LinguiDocumentProps> {
         </Head>
         <body>
           <DocumentBodyStart key='body-start' {...this.props} />
-          <InitColorSchemeScript attribute='class' />
           <Main />
           <NextScript />
           <DocumentBodyEnd key='body-start' {...this.props} />

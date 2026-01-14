@@ -1,26 +1,25 @@
 import type { GraphCommerceConfig } from '@graphcommerce/next-config'
 
-/**
- * Verlichting.nl GraphCommerce Configuration
- * Docs: https://graphcommerce.org/docs/framework/config
- */
+/** Verlichting.nl GraphCommerce Configuration Docs: https://graphcommerce.org/docs/framework/config */
 const config: Partial<GraphCommerceConfig> = {
   // Development settings - change for production
   robotsAllow: false,
   limitSsg: true,
 
-  // Magento Backend
-  magentoEndpoint: 'https://www.verlichting.nl/graphql',
+  // Magento Backend - Local development
+  // Uses local Magento for GraphQL data. Images won't load due to SSL certificate issues.
+  // This is a known limitation - images work in production where SSL is valid.
+  magentoEndpoint: 'https://verlichtingnl.localho.st/graphql',
   magentoVersion: 245, // Magento 2.4.5
   canonicalBaseUrl: 'https://www.verlichting.nl',
 
-  // Storefronts - Dutch only for now
+  // Storefronts - Using local Magento store code
   storefront: [
     {
       locale: 'nl',
-      magentoStoreCode: 'nl', // Verified store code
+      magentoStoreCode: 'nl', // Local Magento store code
       defaultLocale: true,
-      googleAnalyticsId: undefined, // TODO: Add GA ID
+      googleAnalyticsId: undefined,
       googleRecaptchaKey: undefined,
     },
   ],
@@ -29,6 +28,9 @@ const config: Partial<GraphCommerceConfig> = {
   recentlyViewedProducts: { enabled: true },
   productFiltersPro: true,
   productFiltersLayout: 'DEFAULT',
+
+  // Default sort - use 'position' since 'new' doesn't exist in this Magento
+  sortByDefault: 'position',
 
   // Permissions - enable all commerce features
   permissions: {
@@ -43,15 +45,18 @@ const config: Partial<GraphCommerceConfig> = {
   // Price display - controlled by customer type switcher
   // cartDisplayPricesInclTax will be dynamic based on customer type
 
-  // Compare functionality
-  compare: true,
-  compareVariant: 'ICON',
+  // Compare functionality - disabled as Magento Compare module not available
+  compare: false,
+  // compareVariant: 'ICON',
 
   // Wishlist
   wishlistHideForGuests: false,
 
   // Preview mode for content staging
   // previewSecret: process.env.PREVIEW_SECRET,
+
+  // Note: Image URL rewriting is handled in lib/imageLoader.ts
+  // This rewrites local Magento URLs to production for proper image loading
 }
 
 export default config
