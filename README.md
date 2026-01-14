@@ -2,6 +2,28 @@
 
 A headless PWA storefront for Verlichting.nl built with [GraphCommerce](https://graphcommerce.org/).
 
+## Current Status
+
+### ✅ What Works
+- **GraphQL connection to local Magento** - Uses `NODE_TLS_REJECT_UNAUTHORIZED=0` to bypass SSL cert issues
+- **Product images** - URLs are transformed from local to production, images load correctly
+- **Category browsing** - Product listings with filtering and sorting
+- **Product detail pages** - Full product information
+- **Cart functionality** - Add/remove items
+- **Checkout flow** - Basic checkout process
+- **Search** - Product search
+
+### ⚠️ Known Limitations
+- **Missing CMS blocks** - `footer_links_block`, `no-route` page not in local Magento (non-critical warnings)
+- **Missing Snowdog menu** - `main-menu` not configured in local Magento
+- **Large page data warnings** - Some pages exceed 128KB threshold
+- **Turbopack occasional errors** - Next.js 16 Turbopack can have internal errors (see Troubleshooting)
+
+### ❌ Not Yet Configured
+- **Newsletter** - Subscription mutation returns error
+- **Reviews** - Product review submission
+- **Compare** - Disabled in config as Magento module not available
+
 ## Prerequisites
 
 - Node.js >= 20 < 24
@@ -134,18 +156,27 @@ Some CMS blocks referenced in the PWA may not exist in the local Magento. These 
 
 This indicates CMS content from Magento contains HTML that needs proper rendering. Check if the CMS pages/blocks have the correct content format.
 
-### Product images not loading (blank/white boxes)
+### Product images in local development
 
-**Known Limitation**: Product images from local Magento won't load due to SSL certificate issues. The local Magento uses a self-signed certificate that Next.js image optimization cannot verify.
+**How it works**: Product images work in local development through a URL transformation:
 
-The PWA is fully functional for development - you can:
-- Browse categories and products
-- Test cart and checkout flows
-- Work on component styling and layout
+1. Magento returns image URLs like `https://verlichtingnl.localho.st/media/catalog/product/...`
+2. An Apollo Link (`lib/transformImageUrlsLink.ts`) transforms these to `https://www.verlichting.nl/media/catalog/product/...`
+3. Next.js image optimization fetches from production (which has valid SSL)
+4. Images load correctly
 
-Images will work correctly in production where valid SSL certificates are used.
+**Requirements for images to work**:
+- `NODE_TLS_REJECT_UNAUTHORIZED=0` must be set (for GraphQL requests to local Magento)
+- The Apollo Link must be active in both SSR and client-side GraphQL clients
+- The `transformImageUrlsLink` is configured in:
+  - `lib/graphql/graphqlSsrClient.ts` (SSR)
+  - `pages/_app.tsx` (client-side)
 
-**Workaround**: If you need to see images during development, you can temporarily view the product on the production site (www.verlichting.nl) to see how it should look.
+**If images stop working**:
+1. Check that `lib/transformImageUrlsLink.ts` exists and is properly configured
+2. Verify the link is included in the Apollo Client chain
+3. Ensure `www.verlichting.nl` is in `remotePatterns` in `next.config.ts`
+4. Don't set `unoptimized: true` globally in `next.config.ts` - this breaks the image endpoint
 
 ### Turbopack Internal Errors / 500 Internal Server Error
 

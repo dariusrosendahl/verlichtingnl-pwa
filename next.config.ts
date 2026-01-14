@@ -18,9 +18,9 @@ const nextConfig: NextConfig = {
     pagesBufferLength: 10,
   },
   images: {
-    // Images from local Magento won't load due to SSL certificate issues
-    // This is a known limitation in local development
-    unoptimized: process.env.NODE_ENV === 'development',
+    // Do NOT set unoptimized globally - it breaks the /_next/image endpoint
+    // Instead, the Apollo Link transforms local Magento URLs to production URLs
+    // and Next.js image optimization fetches from production (valid SSL)
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     qualities: [52, 75],
     remotePatterns: [

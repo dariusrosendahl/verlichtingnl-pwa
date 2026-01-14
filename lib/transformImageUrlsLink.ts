@@ -2,34 +2,31 @@ import { ApolloLink } from '@apollo/client'
 import { map } from '@graphcommerce/graphql/rxjs'
 
 const LOCAL_HOSTS = ['verlichtingnl.localho.st', 'verlichting.localhost']
+const PRODUCTION_HOST = 'www.verlichting.nl'
 
 /**
  * Recursively transforms image URLs in GraphQL response data.
- * Converts absolute local Magento URLs to relative paths that Next.js can proxy.
+ * Converts local Magento URLs to production URLs.
  *
  * Example:
  * https://verlichtingnl.localho.st/media/catalog/product/image.jpg
- * becomes: /media/catalog/product/image.jpg
+ * becomes: https://www.verlichting.nl/media/catalog/product/image.jpg
  *
- * This allows the Next.js rewrite in next.config.ts to proxy these to production.
+ * This allows images to load with valid SSL certificates in development,
+ * while Next.js image optimization can fetch from production directly.
  */
 function transformUrls<T>(data: T): T {
   if (data === null || data === undefined) return data
 
   if (typeof data === 'string') {
+    // Replace any local host with production host
+    let result = data
     for (const host of LOCAL_HOSTS) {
-      if (data.includes(`https://${host}`)) {
-        try {
-          const url = new URL(data)
-          if (LOCAL_HOSTS.includes(url.hostname)) {
-            return url.pathname as T
-          }
-        } catch {
-          // Not a valid URL
-        }
+      if (result.includes(host)) {
+        result = result.replace(new RegExp(host, 'g'), PRODUCTION_HOST)
       }
     }
-    return data
+    return result as T
   }
 
   if (Array.isArray(data)) {
