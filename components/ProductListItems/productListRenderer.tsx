@@ -1,28 +1,17 @@
 import type { ProductListItemRenderer } from '@graphcommerce/magento-product'
-import { AddProductsToCartFab, ProductListItem } from '@graphcommerce/magento-product'
+import { ProductListItem } from '@graphcommerce/magento-product'
 import { ProductListItemBundle } from '@graphcommerce/magento-product-bundle'
 import { ProductListItemConfigurable } from '@graphcommerce/magento-product-configurable'
 import { ProductListItemDownloadable } from '@graphcommerce/magento-product-downloadable'
 import { ProductListItemGrouped } from '@graphcommerce/magento-product-grouped'
-import { ProductListItemSimple } from '@graphcommerce/magento-product-simple'
 import { ProductListItemVirtual } from '@graphcommerce/magento-product-virtual'
 import { ProductReviewSummary } from '@graphcommerce/magento-review'
 import { ProductWishlistChip } from '@graphcommerce/magento-wishlist'
+import { ProductListItemWithActions } from './ProductListItemWithActions'
 
 export const productListRenderer: ProductListItemRenderer = {
   Skeleton: (props) => <ProductListItem {...props} aspectRatio={[1, 1]} />,
-  SimpleProduct: (props) => {
-    const { sku } = props
-    return (
-      <ProductListItemSimple
-        {...props}
-        aspectRatio={[1, 1]}
-        bottomLeft={<ProductReviewSummary {...props} />}
-        topRight={<ProductWishlistChip {...props} />}
-        bottomRight={<AddProductsToCartFab sku={sku} />}
-      />
-    )
-  },
+  SimpleProduct: (props) => <ProductListItemWithActions {...props} />,
   ConfigurableProduct: (props) => (
     <ProductListItemConfigurable
       {...props}
@@ -45,18 +34,7 @@ export const productListRenderer: ProductListItemRenderer = {
       topRight={<ProductWishlistChip {...props} />}
     />
   ),
-  VirtualProduct: (props) => {
-    const { sku } = props
-    return (
-      <ProductListItemVirtual
-        {...props}
-        aspectRatio={[1, 1]}
-        bottomLeft={<ProductReviewSummary {...props} />}
-        topRight={<ProductWishlistChip {...props} />}
-        bottomRight={<AddProductsToCartFab sku={sku} />}
-      />
-    )
-  },
+  VirtualProduct: (props) => <ProductListItemWithActions {...props} />,
   DownloadableProduct: (props) => (
     <ProductListItemDownloadable
       {...props}

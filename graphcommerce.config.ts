@@ -28,7 +28,8 @@ const config: Partial<GraphCommerceConfig> = {
   // Features
   recentlyViewedProducts: { enabled: true },
   productFiltersPro: true,
-  productFiltersLayout: 'DEFAULT',
+  productFiltersLayout: 'SIDEBAR',
+  productListPaginationVariant: 'EXTENDED',
 
   // Default sort - use 'position' since 'new' doesn't exist in this Magento
   sortByDefault: 'position',
