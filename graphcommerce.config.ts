@@ -6,10 +6,11 @@ const config: Partial<GraphCommerceConfig> = {
   robotsAllow: false,
   limitSsg: true,
 
-  // Magento Backend - Local development
-  // Uses local Magento for GraphQL data. Images won't load due to SSL certificate issues.
-  // This is a known limitation - images work in production where SSL is valid.
-  magentoEndpoint: 'https://verlichtingnl.localho.st/graphql',
+  // Magento Backend - Local development for schema introspection
+  // Production Magento blocks introspection, so we build with local schema
+  // Note: Set MAGENTO_ENDPOINT env var if needed for different environments
+  magentoEndpoint:
+    process.env.MAGENTO_ENDPOINT ?? 'https://verlichtingnl.localho.st/graphql',
   magentoVersion: 245, // Magento 2.4.5
   canonicalBaseUrl: 'https://www.verlichting.nl',
 
